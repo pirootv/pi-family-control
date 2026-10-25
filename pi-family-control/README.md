@@ -6,18 +6,18 @@
 - `raspberry-pi/pi_guard.py`: Raspberry Pi OS Desktop用のTkinter制限画面
 
 ## 重要な注意
-この版は管理サイトからのロック/解除、曜日別時間帯、日使用上限、今日の延長、使用履歴を実装しています。Tkinter画面内のパスワード解除・延長ボタンは付けていません。サイトから解除してください。Tkinterの全画面表示だけではOSショートカット等による回避を完全には防げません。家族用の補助機能であり、強固なペアレンタルコントロールではありません。ネット接続断時は安全側としてロックします。使用履歴は動作中のエージェントが報告できた時間だけです。
+管理サイトからのロック/解除、曜日別時間帯、日使用上限、今日の延長、使用履歴に加えて、Piのロック画面から管理パスワードを入力して5/15/30/60/120/180分の一時解除ができます。一時解除期限はGistに保存され、期限後に通常の制限へ戻ります。旧形式の平文パスワードは正しく入力された際にPBKDF2形式へ自動移行します。新しい設定はPBKDF2で保存します。Tkinterの全画面表示だけではOSショートカット等による回避を完全には防げません。家族用の補助機能であり、強固なペアレンタルコントロールではありません。ネット接続断時は安全側としてロックします。使用履歴は動作中のエージェントが報告できた時間だけです。
 
 ## Gist
 Gist ID: `5c56ef1a0541a164158faef9d54d1b0d`
-ファイル名が正確に `config.json` であることを確認してください。指定Gistの現在の初期JSONを使用できます。GistをSecretにすることを推奨します。Gistのパスワードは平文でなくPBKDF2ハッシュで保存します。
+ファイル名が正確に `config.json` であることを確認してください。指定Gistの現在の初期JSONを使用できます。GistをSecretにすることを推奨します。管理パスワードはPBKDF2ハッシュで保存します。
 
 ## Netlifyへの配置
 1. ZIPを展開し、フォルダ内のファイルをGitHubリポジトリにpushします。
 2. Netlifyで「Add new site」→「Import an existing project」からリポジトリを選択します。
 3. `netlify.toml` を使うため、publish directoryは `site`、functions directoryは `netlify/functions`。Build commandは空欄でOKです。
 4. Netlify Site configuration → Environment variablesに以下を設定:
-   - `GITHUB_TOKEN`: Gistの読み書きができるGitHubトークン
+   - `GITHUB_TOKEN`: Gistの読み書きができるGitHubトークン（fine-grained tokenの場合はGistsの読み書き権限）
    - `GIST_ID`: `5c56ef1a0541a164158faef9d54d1b0d`
    - `SESSION_SECRET`: 32バイト以上のランダムな秘密値
    - `DEVICE_TOKEN`: ラズパイ用のランダムな秘密値
@@ -73,6 +73,7 @@ X-GNOME-Autostart-enabled=true
 
 ## トラブルシューティング
 - 500エラー: Netlify環境変数、Gist ID、トークン権限、`config.json`を確認
+- Gist API 403: Netlifyの`GITHUB_TOKEN`が期限切れでないこと、対象Gistへの読み書き権限があることを確認して再デプロイ
 - 401 device: PiとNetlifyのDEVICE_TOKEN一致を確認
 - Tkinterエラー: `sudo apt install python3-tk`
 - Piがロック状態: サイト設定、ネット接続、日時、タイムゾーンを確認
